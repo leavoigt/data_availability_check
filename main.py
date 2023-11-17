@@ -8,7 +8,7 @@ import matplotlib.colors as mcolors
 # Fix the colours: 1 - no data and 0 - data available
 # Change title to indicator name instead of indicator code 
 # Change country names on the y-axis to display full name
-# Choose pretty colours 
+# Choose pretty colours - completely agree
 
 ### SPECIFY SHEET INFORMATION
 sheet_featureMap = {'WDI Data': ['indicator', 'country.region', 'year'],
@@ -16,11 +16,26 @@ sheet_featureMap = {'WDI Data': ['indicator', 'country.region', 'year'],
                     '4.3.1 (IMF - IR)': ['Column1.@INDICATOR', 'Column1.@REF_AREA', 'Column1.Obs.@TIME_PERIOD'],
                     '4.6.3 (ILO - INEMPL)': ['Attribute:MEASURE', 'Attribute:REF_AREA', 'Obs.Attribute:TIME_PERIOD'],
                     '4.6.4. (ILO - SP)': ['Attribute:MEASURE', 'Attribute:REF_AREA', 'Obs.Attribute:TIME_PERIOD'],
-                    '4.6.5 (ILO - FLFP)': ['Attribute:MEASURE', 'Attribute:REF_AREA', 'Obs.Attribute:TIME_PERIOD']}
+                    '4.6.5 (ILO - FLFP)': ['Attribute:MEASURE', 'Attribute:REF_AREA', 'Obs.Attribute:TIME_PERIOD'],
+                    'OECD Data': ['Variable ', 'Country ', 'TIME_PERIOD'],
+                    '4.4.1 IMF- Infl': ['Indicator', 'Name', 'Year']
+                    }
+
+### Load data from country_codes excel file 
+country_codes_file ="data/country_codes.xlsx"
+country_codes_df = pd.read_excel(country_codes_file, sheet_name="Sheet1")
 
 ### Load file
-file_name = "230619_MSME-DWH-Data.xlsx"
+file_name = "data/230619_MSME-DWH-Data.xlsx"
 xls = pd.ExcelFile(file_name)
+
+### Define function to replace REF_AREA WITH ISO-alpha3 Code:
+def update_ref_area(sheet_name, df):
+    if sheet_name.startswith('4.') and not sheet_name.startswith('4.3.1'):
+        ref_area_col = sheet_featureMap[sheet_name][1]
+        iso_alpha3_dict = country_codes_df.set_index('ISO-alpha3 Code')['Country'].to_dict()
+        df[ref_area_col] = df[ref_area_col].map(iso_alpha3_dict)
+    return df
 
 ### Define heatmap function
 def get_heatmaps(sheet_name, ind_col_name, country_col_name, year_col_name):
@@ -28,8 +43,18 @@ def get_heatmaps(sheet_name, ind_col_name, country_col_name, year_col_name):
     xls = pd.ExcelFile(file_name)
     df = pd.read_excel(xls, sheet_name)
 
+    # Print columns for troubleshooting
+    # print("Columns in DataFrame:")
+    # print(df.columns)
+
+
+       #Update REF_AREA with ISO-alpha3 Code
+    df = update_ref_area(sheet_name, df)
+
     # Get unique indicator list
     ind_list = df[ind_col_name].unique()
+
+ 
 
     for ind in ind_list:
 
