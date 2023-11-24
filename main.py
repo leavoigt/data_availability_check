@@ -19,7 +19,7 @@ sheet_featureMap = {'WDI Data': ['indicator', 'country.region', 'year'],
                     '4.6.5 (ILO - FLFP)': ['Attribute:MEASURE', 'Attribute:REF_AREA', 'Obs.Attribute:TIME_PERIOD']}
 
 ### Load file
-file_name = "230619_MSME-DWH-Data.xlsx"
+file_name = "data/230619_MSME-DWH-Data.xlsx"
 xls = pd.ExcelFile(file_name)
 
 ### Define heatmap function
